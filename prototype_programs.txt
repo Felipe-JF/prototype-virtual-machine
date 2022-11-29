@@ -1,0 +1,40 @@
+local(counter, temp) stack(a, b)
+
+#loop(counter, b, a):   stack(counter, b, a)
+  returnifNotPositive($counter)
+  decrement($counter)   stack(counter, b, a, counter-1)
+  set($counter)         stack(counter-1, b, a)
+  swap                  stack(counter-1, a, b)
+  add1($b)              stack(counter-1, a, a+b)
+  jump(#loop)
+#fibonacci(counter)     stack(counter)
+  constant(0)           stack(counter, 0)
+  constant(1)           stack(counter, 0,1)
+  call(#loop)           stack(counter, b,a)
+  set(#counter)         stack(a,b)
+  drop()                stack(a)
+  print()               stack()
+
+type Array = [length: i8, ...data]
+type Stack = [length: i8, top: *i8, ...data]
+type Result = Done[0] | Fail[1]
+
+#unsafePushArray(data)(*index)    stack(data) pointer(*index)
+  increment(*index)               stack(data) pointer(*index, *index+1)
+  swap()                          stack(data) pointer(*index+1, *index)
+  storeData()                     stack()     pointer(*index+1)
+
+#caseOutOfRange[data][*array, index, length]
+  jump
+#setArray(data)(*array, index)
+  increment(index)                [data][*array, index, length, index]
+  loadPointer(*array)             [data][*array, index, length]
+  branchNegative                  [data][*array, index, length]
+
+#push(data)(*stack)         stack(data)  pointer(*stack)
+  loadPointer(*stack)       stack(data)  pointer(*stack, length)
+  incrementPointer(*stack)  stack(data)  pointer(*stack, length, *stack+1)
+  loadPointer(*stack+1)     stack(data)  pointer(*stack, length, *stack+1, *top)
+  add(*stack, length)       stack(data)  pointer(*stack, length, *stack+1, *top, *stack+1+length)
+  get(*stack)               stack(data)  pointer(*stack, length, *stack+1, *top, *stack+1+length, *stack)
+  returnifNotRange()
